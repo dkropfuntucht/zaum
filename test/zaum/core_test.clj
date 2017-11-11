@@ -1,7 +1,13 @@
 (ns zaum.core-test
   (:require [clojure.test :refer :all]
-            [zaum.core :refer :all]))
+            [zaum.core :refer :all]
+            [zaum.databases.zaum :as zdb]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest test-get-all
+  (testing "Basic test of getting all records in a table"
+    (let [result (perform-op :get
+                             {:operation  :get
+                              :connection {:impl (zdb/new-in-memory)}
+                              :entity     :table-0})]
+      (is (= :ok (:status result)))
+      (is (= (:count result) (count (:data result)))))))
