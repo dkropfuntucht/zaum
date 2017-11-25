@@ -3,17 +3,12 @@
 (defprotocol IZaumDatabase
   (perform-get [this command-map]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
-
 (defmulti perform-op (fn [op-key struct] op-key))
 
 (defmethod perform-op :default
   [op-key struct]
   (throw
-   (IllegalArgumentException. (str "Unkown Operation: " op-key))))
+   (IllegalArgumentException. (str "Unknown Operation: " op-key))))
 
 (defn current-time
   []
