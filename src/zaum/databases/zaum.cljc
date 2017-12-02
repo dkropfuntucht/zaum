@@ -1,32 +1,38 @@
 (ns zaum.databases.zaum
   (:require [zaum.core :as z]))
 
-(def test-data
-  {:table-0
-   [{:created-at 0 :updated-at 1 :text "foo" :other-val 4}
-    {:created-at 1 :updated-at 1 :text "foo" :other-val 7}
-    {:created-at 2 :updated-at 2 :text "bar" :other-val 5}
-    {:created-at 3 :updated-at 3 :text "baz" :other-val 6}]})
-
 (defn perform-get-impl [command-map])
+
+(def search-types
+  { > >
+   :> >})
 
 (defn- construct-filter
   [identifier]
   (fn [v]
     (every?
-     (fn [kv]
-       (and (contains? v (key kv))
-            (= ((key kv) v) (val kv))))
+     (fn [filter-spec]
+       (let [[filter-key filter-search] filter-spec]
+         (and (contains? v filter-key)
+              (cond (vector? filter-search)
+                    ((search-types (first filter-search))
+                     (filter-key v)
+                     (second filter-search))
+                    :or
+                    (= (filter-key v) filter-search)))))
      identifier)))
 
-(defrecord ZaumInMemory []
+(defrecord ZaumInMemory [store]
   z/IZaumDatabase
   (perform-get [_ {:keys [entity identifier]}]
     (cond
       (nil? identifier)
-      (test-data entity)
+      (@store entity)
       (map? identifier)
-      (vec (filter (construct-filter identifier) (test-data entity))))))
+      (vec (filter (construct-filter identifier) (@store entity))))))
 
-(defn new-in-memory []
-  (ZaumInMemory.))
+(defn new-in-memory
+  ([]
+   (ZaumInMemory. (atom {})))
+  ([initial-data]
+   (ZaumInMemory. (atom initial-data))))

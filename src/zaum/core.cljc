@@ -29,4 +29,4 @@
     (assoc data
            :result  :get
            :command commands
-           :count   (count (:data data)))))
+           :count   (if (= :ok (:status data)) (count (:data data)) 0))))
