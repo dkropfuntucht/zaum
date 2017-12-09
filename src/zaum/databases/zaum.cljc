@@ -24,12 +24,31 @@
 
 (defrecord ZaumInMemory [store]
   z/IZaumDatabase
-  (perform-get [_ {:keys [entity identifier]}]
+  (perform-create [_ {:keys [entity level data]}]
+    (cond  (and (= level :table) (contains? @store entity))
+           ;;TODO: likely an error condition or should it be idempotent and 'clean'?
+           ;; - we're considering just returning this as an error
+           ;; - not sure if it shouldn't be idempotent - we'll know more later
+           (throw (Exception. "Attempt to create duplicate table."))
+           (= level :table)
+           ;;TODO: this represents the 'table' - not sure these implementations
+           ;; shouldn't be adapted to assoc and return the command message
+           (do
+             (swap! store #(assoc % entity []))
+             ;; - for :data we return the empty table [] in a collection of "created" table(s)
+             {:status :ok :data [[]] :message (str "Table " entity " created.")})
+           :or
+           (throw (Exception. "Unknown create operation"))))
+
+  (perform-get [_ {:keys [entity identifier] :as command}]
     (cond
+      (not (contains? @store entity))
+      {:status :warning :data [] :message (str "The table " entity " does not exist.")}
       (nil? identifier)
-      (@store entity)
+      {:status :ok :data (@store entity)}
       (map? identifier)
-      (vec (filter (construct-filter identifier) (@store entity))))))
+      {:status :ok
+       :data (vec (filter (construct-filter identifier) (@store entity)))})))
 
 (defn new-in-memory
   ([]

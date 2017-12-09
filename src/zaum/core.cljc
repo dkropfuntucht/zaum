@@ -1,6 +1,7 @@
 (ns zaum.core)
 
 (defprotocol IZaumDatabase
+  (perform-create [this command-map])
   (perform-get [this command-map]))
 
 (defmulti perform-op (fn [op-key struct] op-key))
@@ -16,17 +17,28 @@
      :clj  (System/currentTimeMillis)))
 
 (defn wrap-op
-  [fn]
+  [the-op]
   (let [st     (current-time)
-        result (try {:status :ok :data (fn)}
-                    (catch Throwable t {:status :error :data t}))
+        result (try
+                 (the-op)
+                 (catch Throwable t
+                   {:status :error
+                    :data   t}))
         et     (current-time)]
     (assoc result :time (- et st))))
 
 (defmethod perform-op :get
-  [op-key {:keys [connection] :as commands}]
-  (let [data (wrap-op #(perform-get (:impl connection) commands))]
+  [op-key {:keys [connection] :as command}]
+  (let [data (wrap-op #(perform-get (:impl connection) command))]
     (assoc data
            :result  :get
-           :command commands
+           :command command
+           :count   (if (= :ok (:status data)) (count (:data data)) 0))))
+
+(defmethod perform-op :create
+  [op-key {:keys [connection] :as command}]
+  (let [data (wrap-op #(perform-create (:impl connection) command))]
+    (assoc data
+           :result  :create
+           :command command
            :count   (if (= :ok (:status data)) (count (:data data)) 0))))

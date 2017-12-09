@@ -105,3 +105,34 @@
       (is (= (:count result) 1))
       (is (= (:count result) (count (:data result))))
       (is (= "baz" (-> result :data first :text))))))
+
+(deftest test-read-from-missing-table
+  (testing "Basic read on a nonexistent table"
+    (let [result (perform-op :get
+                             {:operation  :get
+                              :connection {:impl
+                                           (zdb/new-in-memory test-data)}
+                              :entity     :table-1})]
+      (is (= :warning (:status result)))
+      (is (= "The table :table-1 does not exist.") (:message result))
+      (is (zero? (:count result)))
+      (is (= (:count result) (count (:data result)))))))
+
+(deftest test-create-table
+  (testing "Basic test of building a table"
+    (let [con    {:impl (zdb/new-in-memory {})}
+          create (perform-op :create
+                             {:operation  :create
+                              :connection con
+                              :level      :table
+                              :entity     :table-0})
+          read   (perform-op :get
+                             {:operation  :get
+                              :connection con
+                              :entity     :table-0})]
+      (is (= :ok (:status create)))
+      (is (= 1 (:count create)))
+      (is (= (:count create) (count (:data create))))
+      (is (= "Table :table-0 created." (:message create)))
+      (is (= :ok (:status read)))
+      (is (zero? (:count read))))))
