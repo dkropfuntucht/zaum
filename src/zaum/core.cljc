@@ -2,7 +2,7 @@
 
 (defprotocol IZaumDatabase
   (perform-create [this command-map])
-  (perform-get [this command-map]))
+  (perform-read [this command-map]))
 
 (defmulti perform-op (fn [op-key struct] op-key))
 
@@ -27,9 +27,9 @@
         et     (current-time)]
     (assoc result :time (- et st))))
 
-(defmethod perform-op :get
+(defmethod perform-op :read
   [op-key {:keys [connection] :as command}]
-  (let [data (wrap-op #(perform-get (:impl connection) command))]
+  (let [data (wrap-op #(perform-read (:impl connection) command))]
     (assoc data
            :result  :get
            :command command

@@ -15,7 +15,7 @@
 -get next paging
 -update
 -transactions
--create table
+-create table in databases
 -alter table/column
 -destroy table
 -migration

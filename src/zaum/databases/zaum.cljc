@@ -40,7 +40,7 @@
            :or
            (throw (Exception. "Unknown create operation"))))
 
-  (perform-get [_ {:keys [entity identifier] :as command}]
+  (perform-read [_ {:keys [entity identifier] :as command}]
     (cond
       (not (contains? @store entity))
       {:status :warning :data [] :message (str "The table " entity " does not exist.")}
