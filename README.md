@@ -13,32 +13,32 @@ A Clojure library designed to ... well, that part is up to you.
 
 ;;TODO: open problems: joins and subqueries
 
-;; - get with a tablename and specific connection
-{:operation  :get
+;; - read with a tablename and specific connection
+{:operation  :read
  :entity     :tablename
  :connection {}}
 
-;; -> get results:
-{:operation :get
+;; -> read results:
+{:operation :read
  :entity    :tablename}
 ;;==>
-{:result  :get
- :command {:operation :get, :entity :tablename}
+{:result  :read
+ :command {:operation :read, :entity :tablename}
  :status  :ok ; - or error
  :data    [] ; - or exception on error
  :count   n
  :time    ms}
 
-;; - get all of the documents or records from a table
-{:operation :get
+;; - read all of the documents or records from a table
+{:operation :read
  :entity    :tablename}
 
-;; - get a specific item or items
-{:operation  :get
+;; - read a specific item or items
+{:operation  :read
  :entity     :tablename
  :identifier {}}
 
-{:operation  :get
+{:operation  :read
  :entity     :tablename
  :identifier {}
  :sort-by    :key
