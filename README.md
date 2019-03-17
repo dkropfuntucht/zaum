@@ -83,7 +83,7 @@ A Clojure library designed to ... well, that part is up to you.
 
 ;; - a thing for compacting a Couch DB
 {:operation  :native
- :commend    :compact
+ :command    :compact
  :entity     :tablename
  :connection {}}
 
