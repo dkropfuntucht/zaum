@@ -1,5 +1,7 @@
 (ns zaum.core)
 
+(defmulti prepare-connection :dbtype)
+
 (defprotocol IZaumDatabase
   (perform-create [this command-map])
   (perform-read [this command-map])
@@ -60,6 +62,10 @@
            :result  :delete
            :command command
            :count   (if (= :ok (:status data)) (count (:data data)) 0))))
+
+(defn init-connection
+  [connection-map]
+  (assoc connection-map :impl (prepare-connection connection-map)))
 
 (defn process-command
   ([command]
